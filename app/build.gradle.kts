@@ -54,8 +54,8 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.11.0")
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
@@ -67,7 +67,8 @@ dependencies {
     implementation(libs.androidx.camera.view)
 
     // ML Kit
-    implementation(libs.mlkit.face.detection)
+    implementation("com.google.mlkit:face-detection:16.1.7")
 
+    //permissions
     implementation("com.google.accompanist:accompanist-permissions:0.37.3")
 }

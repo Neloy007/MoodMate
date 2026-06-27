@@ -1,19 +1,20 @@
 [versions]
 agp = "9.2.1"
-coreKtx = "1.19.0"
+coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
-lifecycleRuntimeKtx = "2.10.0"
-activityCompose = "1.13.0"
+lifecycleRuntimeKtx = "2.9.2"
+lifecycleCompose = "2.9.2"
+activityCompose = "1.10.1"
 kotlin = "2.4.0"
-composeBom = "2026.02.01"
+composeBom = "2025.06.01"
 
-navigation = "2.9.8"
+navigation = "2.9.3"
 
 camerax = "1.6.1"
 
-mlkitFace = "17.1.0"
+#mlkitFace = "16.1.7"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,7 +42,10 @@ androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", versi
 androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
 
 # ML Kit Face Detection
-mlkit-face-detection = { module = "com.google.mlkit:face-detection", version.ref = "mlkitFace" }
+#mlkit-face-detection = { module = "com.google.mlkit:face-detection", version.ref = "mlkitFace" }
+
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleCompose" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
