@@ -21,7 +21,7 @@ fun CameraScreen() {
 
     if (permissionState.status.isGranted) {
 
-        Text("Camera permission granted")
+        CameraPreview()
 
     } else {
 
