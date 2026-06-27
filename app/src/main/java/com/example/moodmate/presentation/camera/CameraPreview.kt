@@ -17,7 +17,8 @@ import com.example.moodmate.presentation.camera.analyzer.FaceAnalyzer
 
 @Composable
 fun CameraPreview(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onFacesDetected: (Int) -> Unit
 ) {
 
     val context = LocalContext.current
@@ -48,7 +49,9 @@ fun CameraPreview(
 
             imageAnalysis.setAnalyzer(
                 executor,
-                FaceAnalyzer()
+                FaceAnalyzer(
+                    onFacesDetected = onFacesDetected
+                )
             )
 
             val cameraSelector =
