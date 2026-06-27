@@ -1,6 +1,7 @@
 package com.example.moodmate.presentation.camera
 
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -12,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.example.moodmate.presentation.camera.analyzer.FaceAnalyzer
 
 @Composable
 fun CameraPreview(
@@ -41,6 +43,14 @@ fun CameraPreview(
 
             preview.surfaceProvider = previewView.surfaceProvider
 
+            val imageAnalysis = ImageAnalysis.Builder()
+                .build()
+
+            imageAnalysis.setAnalyzer(
+                executor,
+                FaceAnalyzer()
+            )
+
             val cameraSelector =
                 CameraSelector.DEFAULT_FRONT_CAMERA
 
@@ -51,7 +61,9 @@ fun CameraPreview(
                 cameraProvider.bindToLifecycle(
                     lifecycleOwner,
                     cameraSelector,
-                    preview
+                    preview,
+                            imageAnalysis
+
                 )
 
             } catch (e: Exception) {
