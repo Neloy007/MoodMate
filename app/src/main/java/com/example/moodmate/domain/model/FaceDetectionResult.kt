@@ -1,4 +1,4 @@
-package com.example.moodmate.presentation.camera.model
+package com.example.moodmate.domain.model
 
 data class FaceDetectionResult(
     val faceCount: Int = 0,

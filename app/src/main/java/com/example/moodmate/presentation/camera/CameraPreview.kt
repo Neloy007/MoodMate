@@ -14,11 +14,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.moodmate.presentation.camera.analyzer.FaceAnalyzer
+import com.example.moodmate.domain.model.FaceDetectionResult
 
 @Composable
 fun CameraPreview(
     modifier: Modifier = Modifier,
-    onFacesDetected: (Int) -> Unit
+    onFacesDetected: (FaceDetectionResult) -> Unit
 ) {
 
     val context = LocalContext.current
