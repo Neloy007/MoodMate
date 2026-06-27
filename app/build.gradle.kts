@@ -68,4 +68,6 @@ dependencies {
 
     // ML Kit
     implementation(libs.mlkit.face.detection)
+
+    implementation("com.google.accompanist:accompanist-permissions:0.37.3")
 }
