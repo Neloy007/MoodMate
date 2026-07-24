@@ -4,7 +4,6 @@ import android.Manifest
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,26 +11,28 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.moodmate.presentation.camera.components.MoodInfoCard
-import com.google.accompanist.permissions.*
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun CameraScreen() {
+fun CameraScreen(
+    onSaved: () -> Unit
+) {
 
-    val permissionState =
-        rememberPermissionState(
-            Manifest.permission.CAMERA
-        )
+    val permissionState = rememberPermissionState(
+        Manifest.permission.CAMERA
+    )
 
-    val viewModel: CameraViewModel = viewModel()
+    val viewModel: CameraViewModel = hiltViewModel()
 
     val faceResult by viewModel.faceResult.collectAsStateWithLifecycle()
     val mood by viewModel.mood.collectAsStateWithLifecycle()
-    val faceQuality by
-    viewModel.faceQuality.collectAsStateWithLifecycle()
+    val faceQuality by viewModel.faceQuality.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         permissionState.launchPermissionRequest()
@@ -53,7 +54,11 @@ fun CameraScreen() {
                 faceResult = faceResult,
                 faceQuality = faceQuality,
                 onSaveClick = {
-                    // We'll implement this in the next sprint.
+
+                    viewModel.saveMood()
+
+                    onSaved()
+
                 },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -63,7 +68,16 @@ fun CameraScreen() {
 
     } else {
 
-        Text("Please allow camera permission")
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+
+            Text(
+                text = "Please allow camera permission."
+            )
+
+        }
 
     }
 }
