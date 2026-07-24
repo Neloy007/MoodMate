@@ -1,0 +1,4 @@
+- [x] Update `gradle/libs.versions.toml` with AGP 9.3.1, Kotlin 2.4.10, and compatible versions
+- [x] Update `app/build.gradle.kts` to SDK 37 and modern DSL
+- [x] Perform Gradle Sync
+- [x] Verify build with `./gradlew :app:assembleDebug`
