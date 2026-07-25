@@ -9,10 +9,12 @@ class MoodRepositoryImpl(
     private val dao: MoodDao
 ) : MoodRepository {
 
-    override suspend fun saveMood(
-        mood: MoodEntity
-    ) {
-        dao.insertMood(mood)
+    override suspend fun saveMood(mood: MoodEntity) {
+        try {
+            dao.insertMood(mood)
+        } catch (e: Exception) {
+            throw RuntimeException("Failed to save mood", e)
+        }
     }
 
     override suspend fun deleteMood(
@@ -28,4 +30,6 @@ class MoodRepositoryImpl(
     override suspend fun clearHistory() {
         dao.deleteAll()
     }
+
+
 }

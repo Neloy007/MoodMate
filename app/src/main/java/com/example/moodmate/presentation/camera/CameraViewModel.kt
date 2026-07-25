@@ -24,50 +24,40 @@ class CameraViewModel @Inject constructor(
     private val saveMoodUseCase: SaveMoodUseCase
 ) : ViewModel() {
 
-    private val _faceResult =
-        MutableStateFlow(FaceDetectionResult())
+    private val _faceResult = MutableStateFlow(FaceDetectionResult())
     val faceResult = _faceResult.asStateFlow()
 
-    private val _mood =
-        MutableStateFlow(Mood.UNKNOWN)
+    private val _mood = MutableStateFlow(Mood.UNKNOWN)
     val mood = _mood.asStateFlow()
 
-    private val _faceQuality =
-        MutableStateFlow<FaceQuality>(FaceQuality.NoFace)
+    private val _faceQuality = MutableStateFlow<FaceQuality>(FaceQuality.NoFace)
     val faceQuality = _faceQuality.asStateFlow()
 
     fun updateFaceResult(result: FaceDetectionResult) {
-
         _faceResult.value = result
-
-        val estimatedMood =
-            moodEstimator.estimate(result)
-
-        val stableMood =
-            moodStabilizer.addMood(estimatedMood)
-
+        val estimatedMood = moodEstimator.estimate(result)
+        val stableMood = moodStabilizer.addMood(estimatedMood)
         _mood.value = stableMood
-
-        _faceQuality.value =
-            qualityChecker.check(result)
+        _faceQuality.value = qualityChecker.check(result)
     }
 
     fun saveMood() {
-
         viewModelScope.launch {
-
             saveMoodUseCase(
                 MoodEntity(
                     mood = mood.value,
-                    smileProbability =
-                        faceResult.value.smileProbability ?: 0f,
-                    createdAt =
-                        System.currentTimeMillis()
+                    smileProbability = faceResult.value.smileProbability ?: 0f,
+                    createdAt = System.currentTimeMillis()
                 )
             )
-
         }
-
     }
 
+    // Helper function to get current mood and smile probability
+    fun getCurrentMoodData(): Pair<Mood, Float> {
+        return Pair(
+            mood.value,
+            faceResult.value.smileProbability ?: 0f
+        )
+    }
 }
