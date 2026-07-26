@@ -1,27 +1,29 @@
 package com.example.moodmate.presentation.camera.components
 
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.FlashOff
+import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.moodmate.domain.model.FaceDetectionResult
 import com.example.moodmate.presentation.camera.CameraPreview
 
@@ -29,204 +31,115 @@ import com.example.moodmate.presentation.camera.CameraPreview
 fun InstantStyleCameraView(
     onFacesDetected: (FaceDetectionResult) -> Unit,
     modifier: Modifier = Modifier,
-    boxSize: Int = 350,
-    showHoldText: Boolean = true
+    onCapture: () -> Unit = {},
+    onFlipCamera: () -> Unit = {},
+    cornerRadius: Int = 64
 ) {
-    val density = LocalDensity.current
-
-    // Animated rotation for the gradient border
-    val infiniteTransition = rememberInfiniteTransition()
-    val rotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(8000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        )
-    )
-
-    // Pulse animation
-    val pulse by infiniteTransition.animateFloat(
-        initialValue = 0.8f,
-        targetValue = 1.2f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1500, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        )
-    )
+    var isFlashOn by remember { mutableStateOf(false) }
+    val shape = RoundedCornerShape(cornerRadius.dp)
 
     Box(
         modifier = modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
+            .shadow(
+                elevation = 24.dp,
+                shape = shape,
+                ambientColor = Color(0xFF7C6FE0).copy(alpha = 0.35f),
+                spotColor = Color(0xFF7C6FE0).copy(alpha = 0.35f)
+            )
+            .clip(shape),
+        contentAlignment = Alignment.BottomCenter
     ) {
-        // Main box container
+        // Live camera feed
+        CameraPreview(
+            modifier = Modifier.fillMaxSize(),
+            onFacesDetected = onFacesDetected,
+            isCircular = false
+        )
+
+        // Soft gradient at the bottom so the control icons stay legible
+        // over whatever the camera is showing
         Box(
             modifier = Modifier
-                .size(boxSize.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .border(
-                    width = 2.dp,
-                    color = Color.White.copy(alpha = 0.2f),
-                    shape = RoundedCornerShape(20.dp)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            // Camera preview inside box
-            CameraPreview(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(16.dp)),
-                onFacesDetected = onFacesDetected,
-                isCircular = false
-            )
-
-            // Animated gradient border overlay
-            Canvas(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                val borderWidth = with(density) { 3.dp.toPx() }
-                val cornerRadius = with(density) { 20.dp.toPx() }
-
-                rotate(rotation) {
-                    drawRoundRect(
-                        brush = Brush.sweepGradient(
-                            colors = listOf(
-                                Color(0xFF4A90D9).copy(alpha = 0.9f),
-                                Color(0xFF6A5ACD).copy(alpha = 0.6f),
-                                Color(0xFF4A90D9).copy(alpha = 0.9f)
-                            )
-                        ),
-                        topLeft = Offset(borderWidth / 2, borderWidth / 2),
-                        size = Size(
-                            size.width - borderWidth,
-                            size.height - borderWidth
-                        ),
-                        cornerRadius = CornerRadius(cornerRadius - borderWidth / 2),
-                        style = Stroke(
-                            width = borderWidth,
-                            cap = StrokeCap.Round
+                .fillMaxWidth()
+                .height(140.dp)
+                .align(Alignment.BottomCenter)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.4f)
                         )
                     )
-                }
-            }
+                )
+        )
 
-            // Corner accents
+        // Bottom control row: flash / shutter / flip
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(horizontal = 36.dp, vertical = 22.dp),
+//            horizontalArrangement = Arrangement.SpaceBetween,
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            CameraCircleButton(
+//                icon = if (isFlashOn) Icons.Default.FlashOn else Icons.Default.FlashOff,
+//                size = 48.dp,
+//                onClick = { isFlashOn = !isFlashOn }
+//            )
+//
+//            ShutterButton(onClick = onCapture)
+//
+//            CameraCircleButton(
+//                icon = Icons.Default.Autorenew,
+//                size = 48.dp,
+//                onClick = onFlipCamera
+//            )
+//        }
+    }
+}
+
+@Composable
+private fun CameraCircleButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    size: Dp,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(Color.Black.copy(alpha = 0.35f)),
+        contentAlignment = Alignment.Center
+    ) {
+        IconButton(onClick = onClick) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(22.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ShutterButton(onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(76.dp)
+            .clip(CircleShape)
+            .border(width = 4.dp, color = Color.White.copy(alpha = 0.65f), shape = CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        IconButton(
+            onClick = onClick,
+            modifier = Modifier.size(76.dp)
+        ) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp)
-            ) {
-                val cornerSize = with(density) { 40.dp.toPx() }
-                val strokeWidth = with(density) { 3.dp.toPx() }
-                val padding = with(density) { 0.dp.toPx() }
-
-                Canvas(modifier = Modifier.fillMaxSize()) {
-                    // Top-left corner
-                    drawLine(
-                        color = Color(0xFF4A90D9).copy(alpha = 0.8f),
-                        start = Offset(padding, padding + cornerSize),
-                        end = Offset(padding, padding),
-                        strokeWidth = strokeWidth
-                    )
-                    drawLine(
-                        color = Color(0xFF4A90D9).copy(alpha = 0.8f),
-                        start = Offset(padding, padding),
-                        end = Offset(padding + cornerSize, padding),
-                        strokeWidth = strokeWidth
-                    )
-
-                    // Top-right corner
-                    drawLine(
-                        color = Color(0xFF4A90D9).copy(alpha = 0.8f),
-                        start = Offset(size.width - padding, padding + cornerSize),
-                        end = Offset(size.width - padding, padding),
-                        strokeWidth = strokeWidth
-                    )
-                    drawLine(
-                        color = Color(0xFF4A90D9).copy(alpha = 0.8f),
-                        start = Offset(size.width - padding, padding),
-                        end = Offset(size.width - padding - cornerSize, padding),
-                        strokeWidth = strokeWidth
-                    )
-
-                    // Bottom-left corner
-                    drawLine(
-                        color = Color(0xFF4A90D9).copy(alpha = 0.8f),
-                        start = Offset(padding, size.height - padding - cornerSize),
-                        end = Offset(padding, size.height - padding),
-                        strokeWidth = strokeWidth
-                    )
-                    drawLine(
-                        color = Color(0xFF4A90D9).copy(alpha = 0.8f),
-                        start = Offset(padding, size.height - padding),
-                        end = Offset(padding + cornerSize, size.height - padding),
-                        strokeWidth = strokeWidth
-                    )
-
-                    // Bottom-right corner
-                    drawLine(
-                        color = Color(0xFF4A90D9).copy(alpha = 0.8f),
-                        start = Offset(size.width - padding, size.height - padding - cornerSize),
-                        end = Offset(size.width - padding, size.height - padding),
-                        strokeWidth = strokeWidth
-                    )
-                    drawLine(
-                        color = Color(0xFF4A90D9).copy(alpha = 0.8f),
-                        start = Offset(size.width - padding, size.height - padding),
-                        end = Offset(size.width - padding - cornerSize, size.height - padding),
-                        strokeWidth = strokeWidth
-                    )
-                }
-            }
-
-            // Subtle glow overlay
-            Canvas(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                drawRoundRect(
-                    brush = Brush.radialGradient(
-                        colors = listOf(
-                            Color.White.copy(alpha = 0.03f),
-                            Color.Transparent
-                        ),
-                        radius = size.minDimension / 2
-                    ),
-                    cornerRadius = CornerRadius(with(density) { 20.dp.toPx() })
-                )
-            }
-
-            // Face detection status indicator
-            if (showHoldText) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(16.dp)
-                ) {
-                    Canvas(modifier = Modifier.size(8.dp)) {
-                        drawCircle(
-                            color = Color(0xFF4CAF50),
-                            radius = with(density) { 4.dp.toPx() }
-                        )
-                    }
-                }
-            }
-        }
-
-        // "HOLD TO INSTANT" label
-        if (showHoldText) {
-            Text(
-                text = "HOLD TO INSTANT",
-                style = MaterialTheme.typography.labelLarge.copy(
-                    fontWeight = FontWeight.Medium,
-                    letterSpacing = 3.sp,
-                    fontSize = 12.sp
-                ),
-                color = Color.White.copy(alpha = 0.5f),
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 20.dp)
+                    .size(58.dp)
+                    .clip(CircleShape)
+                    .background(Color.White)
             )
         }
     }

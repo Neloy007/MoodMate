@@ -3,15 +3,20 @@ package com.example.moodmate.presentation.home
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -21,7 +26,13 @@ import androidx.compose.ui.unit.sp
 import com.example.moodmate.R
 import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class)
+// Palette pulled from the design
+private val BgLavender = Color(0xFFF3F1FB)
+private val PurplePrimary = Color(0xFF7C6FE0)
+private val PurpleDark = Color(0xFF1A1A2E)
+private val TextGray = Color(0xFF8A8A9A)
+private val CardWhite = Color(0xFFFFFFFF)
+
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -30,7 +41,9 @@ fun HomeScreen(
     onHistoryClick: () -> Unit = {},
     onAnalyticsClick: () -> Unit = {},
     onJournalClick: () -> Unit = {},
-    onSettingsClick: () -> Unit = {}
+    onSettingsClick: () -> Unit = {},
+    onMenuClick: () -> Unit = {},
+    onNotificationsClick: () -> Unit = {}
 ) {
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     val timeOfDay = when (hour) {
@@ -39,264 +52,268 @@ fun HomeScreen(
         else -> "Evening"
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "MoodMate",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF4A90D9)
-                        )
-                    )
-                },
-                actions = {
-                    IconButton(onClick = onSettingsClick) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings",
-                            tint = Color(0xFF4A90D9)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White.copy(alpha = 0.9f)
-                )
-            )
-        },
-        containerColor = Color(0xFFF5F8FF)
-    ) { paddingValues ->
-        Box(
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+    ) {
+        // Background image - shown at full strength, no lavender wash on top of it
+        Image(
+            painter = painterResource(id = R.drawable.bgimagehome),
+            contentDescription = "Background",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
         ) {
-            // Background Image
-            Image(
-                painter = painterResource(id = R.drawable.backgroundresult),
-                contentDescription = "Background",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-                alpha = 0.2f
-            )
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // Main Content
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            // Top bar: hamburger + notification bell
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Welcome Section
+                RoundIconButton(icon = Icons.Outlined.Menu, onClick = onMenuClick)
+                Box {
+                    RoundIconButton(icon = Icons.Outlined.Notifications, onClick = onNotificationsClick)
+                    Box(
+                        modifier = Modifier
+                            .size(9.dp)
+                            .align(Alignment.TopEnd)
+                            .background(PurplePrimary, CircleShape)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Greeting + illustration
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Good $timeOfDay,",
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = TextGray
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "$userName 👋",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PurplePrimary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "How are you today?",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = PurpleDark
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = "Your mood matters. Let's\ncheck in and take care of you.",
+                        fontSize = 15.sp,
+                        color = TextGray,
+                        lineHeight = 20.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(15.dp))
+
+            }
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            // Check Mood banner
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(Color(0xFF8B7EE8), Color(0xFF6C5CE7))
+                        )
+                    )
+                    .padding(horizontal = 20.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxSize(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text(
-                            text = "Good $timeOfDay, $userName 😊",
-                            style = MaterialTheme.typography.headlineSmall.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1A1A2E),
-                                fontSize = 22.sp
-                            )
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "How are you today?",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                color = Color(0xFF666666)
-                            )
-                        )
-                    }
-
-                    Surface(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .clip(CircleShape),
-                        color = Color(0xFF4A90D9)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = "😊",
-                                fontSize = 28.sp
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "Your mood matters. Let's check in and take care of you.",
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = Color(0xFF666666),
-                        lineHeight = 22.sp
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp)
-                )
-
-                Divider(
-                    color = Color(0xFFE8E8E8),
-                    modifier = Modifier.padding(vertical = 4.dp)
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Check Mood Card
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(120.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color.White.copy(alpha = 0.95f)
-                    ),
-                    elevation = CardDefaults.cardElevation(
-                        defaultElevation = 2.dp
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(Color.White),
+                            contentAlignment = Alignment.Center
                         ) {
+                            Text(text = "🙂", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Column {
                             Text(
                                 text = "Check Mood",
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF1A1A2E)
-                                )
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
                             )
                             Text(
                                 text = "How are you feeling right now?",
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    color = Color(0xFF666666)
-                                )
-                            )
-                        }
-
-                        Button(
-                            onClick = onCheckMoodClick,
-                            shape = CircleShape,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF4A90D9)
-                            ),
-                            modifier = Modifier.size(56.dp)
-                        ) {
-                            Text(
-                                text = "😊",
-                                fontSize = 24.sp
+                                fontSize = 10.sp,
+                                color = Color.White.copy(alpha = 0.85f)
                             )
                         }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Grid of Menu Items
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    IconButton(
+                        onClick = onCheckMoodClick,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(Color.White, CircleShape)
                     ) {
-                        MenuItemCard(
-                            icon = "📖",
-                            title = "Journal",
-                            subtitle = "View your mood history & notes",
-                            onClick = onJournalClick,
-                            modifier = Modifier.weight(1f)
-                        )
-                        MenuItemCard(
-                            icon = "📊",
-                            title = "Analytics",
-                            subtitle = "See your mood patterns & insights",
-                            onClick = onAnalyticsClick,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        MenuItemCard(
-                            icon = "📝",
-                            title = "History",
-                            subtitle = "Browse your past mood records",
-                            onClick = onHistoryClick,
-                            modifier = Modifier.weight(1f)
-                        )
-                        MenuItemCard(
-                            icon = "⚙️",
-                            title = "Settings",
-                            subtitle = "Customize your experience",
-                            onClick = onSettingsClick,
-                            modifier = Modifier.weight(1f)
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = "Check mood",
+                            tint = PurplePrimary
                         )
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // 2x2 grid
+            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                    MenuItemCard(
+                        icon = Icons.Default.MenuBook,
+                        iconBg = Color(0xFFEDE9FE),
+                        iconTint = PurplePrimary,
+                        title = "Journal",
+                        subtitle = "View your mood history & notes",
+                        onClick = onJournalClick,
+                        modifier = Modifier.weight(1f)
+                    )
+                    MenuItemCard(
+                        icon = Icons.Default.BarChart,
+                        iconBg = Color(0xFFDDF5E8),
+                        iconTint = Color(0xFF34B36B),
+                        title = "Analytics",
+                        subtitle = "See your mood patterns & insights",
+                        onClick = onAnalyticsClick,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                    MenuItemCard(
+                        icon = Icons.Default.CalendarMonth,
+                        iconBg = Color(0xFFFCE4EC),
+                        iconTint = Color(0xFFE0568A),
+                        title = "History",
+                        subtitle = "Browse your past mood records",
+                        onClick = onHistoryClick,
+                        modifier = Modifier.weight(1f)
+                    )
+                    MenuItemCard(
+                        icon = Icons.Default.Settings,
+                        iconBg = Color(0xFFE3EEFC),
+                        iconTint = Color(0xFF4A90D9),
+                        title = "Settings",
+                        subtitle = "Customize your experience",
+                        onClick = onSettingsClick,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(40.dp))
+        }
+
+    }
+}
+
+@Composable
+private fun RoundIconButton(icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(44.dp)
+            .clip(CircleShape)
+            .background(Color.White),
+        contentAlignment = Alignment.Center
+    ) {
+        IconButton(onClick = onClick) {
+            Icon(imageVector = icon, contentDescription = null, tint = PurpleDark)
         }
     }
 }
 
 @Composable
 fun MenuItemCard(
-    icon: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconBg: Color,
+    iconTint: Color,
     title: String,
     subtitle: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier
-            .height(100.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White.copy(alpha = 0.95f)
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 1.dp
-        ),
+        modifier = modifier.height(140.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = CardWhite),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         onClick = onClick
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(14.dp),
+                .padding(16.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = icon,
-                fontSize = 28.sp
-            )
-            Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(iconBg),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(imageVector = icon, contentDescription = null, tint = iconTint)
+                }
+                Icon(
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = null,
+                    tint = PurplePrimary
+                )
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1A1A2E)
-                    )
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = PurpleDark
                 )
                 Text(
                     text = subtitle,
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = Color(0xFF888888),
-                        lineHeight = 16.sp
-                    ),
+                    fontSize = 12.sp,
+                    color = TextGray,
+                    lineHeight = 16.sp,
                     maxLines = 2
                 )
             }
